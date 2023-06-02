@@ -1,18 +1,12 @@
 # -*- coning: utf-8 -*-
 import sys
-from enum import Enum
+import random
 
 import pygame
 
 import constants
-from game.plane import OurPlane, SmallEnemyPlane
-
-
-class GameStatues(Enum):
-    # 游戏状态
-    READY = 0  # 准备状态
-    PLAYING = 1  # 游戏中
-    OVER = 2  # 结束游戏
+from game.plane import MyPlane, EnemyPlane
+from game.status import GameStatues
 
 
 class PlaneWar:
@@ -27,8 +21,8 @@ class PlaneWar:
         self.clock = pygame.time.Clock()
 
         # 一架飞机可以属于多个精灵组
-        self.small_enemies = pygame.sprite.Group()
-        # 游戏结果
+        self.enemies = pygame.sprite.Group()
+        # 游戏分数
         self.score = 0
 
         self.width, self.height = width, height
@@ -66,10 +60,11 @@ class PlaneWar:
         # 设置音乐音量0-1，0代表静音，1代表最大音量
         pygame.mixer.music.set_volume(.2)
 
-        # 我方飞机对象
-        self.my_plane = OurPlane(self.screen, speed=5)
+        # 我方飞机 设置开始位置在屏幕中下方
+        my_plane_left = int(self.width / 2)
+        my_plane_top = int(self.height * 0.8)
+        self.my_plane = MyPlane(my_plane_left, my_plane_top, speed=5)
 
-        # self.clock = pygame.time.Clock()
         # 记录键盘上的某一个,用于控制飞机
         self.key_down = None
 
@@ -94,42 +89,43 @@ class PlaneWar:
                     self.my_plane.shoot()
                 elif self.status == GameStatues.OVER:
                     self.status = GameStatues.READY
-                    self.add_small_enemies(6)
+                    self.add_enemies(6)
             elif event.type == pygame.KEYDOWN:
                 # 键盘事件
-                self.key_down = event.key
                 # 游戏中，才需要控制键盘AWSD
                 if self.status == GameStatues.PLAYING:
                     # W 或者 ⬆️ 向上移动
                     if event.key == pygame.K_w or event.key == pygame.K_UP:
-                        self.my_plane.move_up()
+                        self.my_plane.move_up(miny=0)
 
                     # S 或者 ⬇️ 向下移动
                     elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                        self.my_plane.move_down()
+                        self.my_plane.move_down(maxy=self.height - self.my_plane.plane_h)
 
                     # A 或者 ⬅️ 向左移动
                     elif event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                        self.my_plane.move_left()
+                        self.my_plane.move_left(minx=0)
 
                     # D 或者 ➡️ 向右移动
                     elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                        self.my_plane.move_rige()
+                        self.my_plane.move_right(maxx=self.width - self.my_plane.plane_w)
 
                     # 空格键发射子弹
                     elif event.key == pygame.K_SPACE:
                         self.my_plane.shoot()
 
-    def add_small_enemies(self, num):
+    def add_enemies(self, num):
         """
-        随机生成N架小型敌机
+        随机生成N架敌机
         :param num: 飞机的生产数量
         :return:
         """
         # 随机生成num架小型飞机
         for i in range(num):
-            plane = SmallEnemyPlane(self.screen, 5)
-            plane.add(self.small_enemies)
+            left = random.randint(0, self.width-constants.P_WIDTH)
+            top = random.randint(-5 * constants.P_HEIGHT, -constants.P_HEIGHT)
+            enemy = EnemyPlane(left, top)
+            self.enemies.add(enemy)
 
     def run_game(self):
         """游戏主循环部分"""
@@ -143,38 +139,38 @@ class PlaneWar:
             self.bind_event()
 
             # 3.更新游戏状态
-            if self.status == self.READY:
+            if self.status == GameStatues.READY:
                 self.screen.blit(self.bg, self.bg.get_rect())
-                #标题
+                # 标题
                 self.screen.blit(self.img_game_title, self.img_game_title_rect)
-                #开始按钮
+                # 开始按钮
                 self.screen.blit(self.btn_start, self.btn_start_rect)
                 self.key_down = None
-            elif self.status == self.PLAYING:
+            elif self.status == GameStatues.PLAYING:
                 # 游戏进行中
                 # 绘制背景
                 self.screen.blit(self.bg, self.bg.get_rect())
                 # 绘制飞机
-                self.my_plane.update(self)
+                self.update_my_plane()
                 # 绘制子弹
-                self.my_plane.bullets.update(self)
+                self.update_bullet()
                 # 绘制敌方飞机
-                self.small_enemies.update()
+                self.update_enemies()
                 # 游戏分数
                 score_text = self.score_font.render(
-                    '得分: {0}'.format(self.rest.score),
+                    '得分: {0}'.format(self.score),
                     False,
                     constants.TEXT_SCORE_COLOR
                 )
                 self.screen.blit(score_text, score_text.get_rect())
-            elif self.status == self.OVER:
+            elif self.status == GameStatues.OVER:
                 # 游戏结束
                 # 游戏背景
                 self.screen.blit(self.bg_over, self.bg_over.get_rect())
                 # 分数统计
                 # 1. 本次总分
                 score_text = self.score_font.render(
-                    '{0}'.format(self.rest.score),
+                    '{0}'.format(self.score),
                     False,
                     constants.TEXT_SCORE_COLOR
                 )
@@ -186,12 +182,47 @@ class PlaneWar:
                     int(self.height / 2)
                 )
                 self.screen.blit(score_text, score_text_rect)
-                # 2. 历史最高分
-                score_his = self.score_font.render(
-                    '{0}'.format(self.rest.get_max_core()),
-                    False,
-                    constants.TEXT_SCORE_COLOR
-                )
-                self.screen.blit(score_his, (150, 40))
-
             pygame.display.flip()
+
+    def update_my_plane(self):
+        # 更新飞机位置
+        self.screen.blit(self.my_plane.image, self.my_plane.rect)
+        # 碰撞检测我方飞机和敌方飞机是否发生碰撞
+        rest = pygame.sprite.spritecollide(self.my_plane, self.enemies, False)
+        if rest:
+            # 1.游戏结束
+            self.status = GameStatues.OVER
+            # 2.清除敌方飞机
+            self.enemies.empty()
+            # 3.我放飞机坠毁
+            self.my_plane.broken_down()
+            for img in self.my_plane.destroy_img_list:
+                self.screen.blit(img, self.my_plane.rect)
+
+    def update_bullet(self):
+        for bullet in self.my_plane.bullets:
+            bullet.update()
+            self.screen.blit(bullet.image, bullet.rect)
+            rect = pygame.sprite.spritecollide(bullet, self.enemies, False)
+            for r in rect:
+                # 1.子弹消失
+                r.kill()
+                if hasattr(r, "broken_down"):
+                    # 2.飞机爆炸效果
+                    r.broken_down()
+                    self.add_enemies(1)
+                # 3.统计游戏成绩
+                self.score += constants.SCORE_SHOOT_SMALL
+
+    def update_enemies(self):
+        """更新敌方飞机的移动"""
+        for enemy in self.enemies:
+            enemy.move_down()
+            # 画在屏幕上
+            self.screen.blit(enemy.image, enemy.rect)
+
+            # 超出范围处理
+            if enemy.rect.top >= self.height:
+                enemy.kill()
+                enemy.active = False
+                self.add_enemies(1)

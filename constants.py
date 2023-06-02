@@ -30,15 +30,11 @@ TEXT_SCORE_COLOR = pygame.Color(255, 255, 0)
 # 击中小型飞机加分值
 SCORE_SHOOT_SMALL = 10
 
-# 游戏结果保存的文件地址
-PLAY_RESULT_STORE_FILE = os.path.join(BASE_DIR, 'store/rect.txt')
-
-# 我方的飞机静态资源
-UOR_PLANE_IMG_LIST = [
-    os.path.join(RESOURCE_DIR, 'images/hero1.png'),
-    os.path.join(RESOURCE_DIR, 'images/hero2.png')
-]
-OUR_DESTROY_IMG_LIST = [
+# 我方飞机静态资源
+MY_PLANE_IMG = os.path.join(RESOURCE_DIR, 'images/hero1.png')
+# 我方飞机坠毁的音效
+MY_PLANE_DOWN_SOUND = os.path.join(RESOURCE_DIR, 'sounds/my_down.wav')
+MY_DESTROY_IMG_LIST = [
     os.path.join(RESOURCE_DIR, 'images/hero_broken_n1.png'),
     os.path.join(RESOURCE_DIR, 'images/hero_broken_n2.png'),
     os.path.join(RESOURCE_DIR, 'images/hero_broken_n3.png'),
@@ -50,15 +46,20 @@ BULLET_TMG = os.path.join(RESOURCE_DIR, 'images/bullet1.png')
 # 子弹发射音效
 BULLET_SHOOT_TMG = os.path.join(RESOURCE_DIR, 'sounds/bullet.wav')
 
-# 敌方小型飞机的图片和音效
-SMALL_ENEMY_PLANE_IMG_LIST = [
-    os.path.join(RESOURCE_DIR, 'images/enemy1.png')
-]
-SMALL_ENEMY_PLANE_DEST0OY_IMG_LIST = [
+# 敌方飞机的图片和音效
+ENEMY_PLANE_IMG = os.path.join(RESOURCE_DIR, 'images/enemy1.png')
+ENEMY_PLANE_DEST0OY_IMG_LIST = [
     os.path.join(RESOURCE_DIR, 'images/enemy1_down1.png'),
     os.path.join(RESOURCE_DIR, 'images/enemy1_down2.png'),
     os.path.join(RESOURCE_DIR, 'images/enemy1_down3.png'),
     os.path.join(RESOURCE_DIR, 'images/enemy1_down4.png'),
 ]
 # 小型飞机坠毁的音效
-SMALL_ENEMY_PLANE_DOWN_SOUND = os.path.join(RESOURCE_DIR, 'sounds/enemy1_down.wav')
+ENEMY_PLANE_DOWN_SOUND = os.path.join(RESOURCE_DIR, 'sounds/enemy1_down.wav')
+
+PLANE_SPEED = 3
+BULLET_SPEED = 10
+
+# 飞机的默认大小
+P_WIDTH = 100
+P_HEIGHT = 124

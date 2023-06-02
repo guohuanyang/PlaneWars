@@ -12,7 +12,7 @@ def main():
     # 初始话游戏
     war = PlaneWar(game_name, height, width)
     # 添加4只小型飞机
-    war.add_small_enemies(4)
+    war.add_enemies(4)
     # 开启游戏
     war.run_game()
 
