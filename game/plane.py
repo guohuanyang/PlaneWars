@@ -1,13 +1,4 @@
-# !/usr/bin/eny python3
 # -*- coning: utf-8 -*-
-
-__author__ = 'LaoTan'
-
-"""
-    飞机的机类
-
-"""
-
 from game.bullet import Bullet
 import pygame
 import constants
@@ -15,7 +6,7 @@ import random
 
 
 class Plane(pygame.sprite.Sprite):
-    """ 飞机的基础类"""
+    """飞机的基础类"""
     # 飞机的图片
     plane_images = []
     # 飞机的爆炸的图片
@@ -43,8 +34,6 @@ class Plane(pygame.sprite.Sprite):
         # 飞机的宽度和高度
         self.plane_w, self.plane_h = self.img_list[0].get_size()
 
-        # 游戏窗口的宽度和高度
-        self.width, self.height = self.screen.get_size()
         # 游戏窗口的宽度和高度
         self.width, self.height = self.screen.get_size()
 
@@ -175,7 +164,7 @@ class SmallEnemyPlane(Plane):
     # 飞机的爆炸的图片
     destroy_images = constants.SMALL_ENEMY_PLANE_DEST0OY_IMG_LIST
     # 坠毁的音乐地址
-    down_sound_src = constants.SMALL_ENEMY_PLANE_DOWN_SOUNO
+    down_sound_src = constants.SMALL_ENEMY_PLANE_DOWN_SOUND
 
     def __init__(self, screen, speed):
         super().__init__(screen, speed)
